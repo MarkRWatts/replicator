@@ -316,7 +316,6 @@ function bindControls() {
   });
   $('sewout').addEventListener('input', (e) => { state.sewout = e.target.value / 1000; renderSewout(); draw(); });
   $('export').addEventListener('click', exportPES);
-  $('threadlist').addEventListener('click', exportThreadList);
   $('printList').addEventListener('click', printThreadList);
   new ResizeObserver(() => { renderZoom(); draw(); }).observe($('drop'));
   bindZoom();
@@ -854,7 +853,6 @@ function renderAll() {
   renderSequence();
   renderSewout();
   $('export').disabled = !state.pattern || state.pesMode;
-  $('threadlist').hidden = !state.pattern || state.pesMode || !!downloads;
   // Pages hosted on claude.ai can't open the print dialog, so the button only shows elsewhere.
   $('printList').hidden = !state.pattern || !!window.claude?.use;
   renderZoom();
@@ -886,7 +884,7 @@ let downloads = null;
 if (window.claude?.use) {
   window.claude.use('downloads').then((d) => {
     downloads = d;
-    if (d) $('export').textContent = 'Download PES (.zip)';
+    if (d) $('export').querySelector('.label').textContent = 'Download PES (.zip)';
     renderAll();
   }).catch(() => {});
 }
@@ -1007,12 +1005,6 @@ async function printThreadList() {
   sheet.append(head, top, table, note);
   try { await img.decode(); } catch { /* print anyway */ }
   window.print();
-}
-
-function exportThreadList() {
-  if (!state.pattern) return;
-  const name = safeName();
-  saveBlob(name + '.threads.txt', new Blob([threadListText(state.pattern, name)], { type: 'text/plain' }));
 }
 
 function saveBlob(filename, blob) {

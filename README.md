@@ -21,7 +21,7 @@ no account and no build step.
    don't want sewn, such as the background.
 4. **Check the preview**, on the fabric colour you're using, zoomed from 25% to 400% of actual size. The sew-out
    slider replays the stitching in order.
-5. **Download the PES file**, plus a thread list, and sew.
+5. **Download the PES file**, print the thread list, and sew.
 
 You can also open an existing `.pes` file to preview it.
 
@@ -70,9 +70,8 @@ Each thread gets an estimate of how much you'll use: the exact sewn length, plus
 trip through the fabric, plus a tail at each cut. That puts professionally digitized designs at about 5 m per 1,000
 stitches, the usual rule of thumb. Fabric and tension vary it by about a quarter either way, so allow some spare.
 
-A PES file can only name Brother's 64 colours, so your machine will show Brother names at each colour change. Every
-download comes with a thread list giving the real thread numbers, and **Print thread list** makes a one-page sheet
-to keep by the machine:
+A PES file can only name Brother's 64 colours, so your machine will show Brother names at each colour change.
+**Print thread list** makes a one-page sheet with the real thread numbers in sewing order, to keep by the machine:
 
 <img src="docs/images/print-sheet.png" alt="Printed thread list: design picture, size, stitches and sewing time, and a table of threads in sewing order with swatches, machine colour names, estimates and tick boxes" width="560">
 
@@ -108,4 +107,4 @@ The PES format, as worked out from Brother-generated files, is described in [`do
 
 ## Licence
 
-[GNU General Public License v3.0](LICENSE).
+[GNU General Public License v3.0](LICENSE). Button icons are from [Lucide](https://lucide.dev) (ISC licence).
