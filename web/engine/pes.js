@@ -135,8 +135,7 @@ export function writePES(input, label) {
   // ---- PEC section
   const pec = out.length;
   out.patch(pecOffsetPos, [pec, pec >> 8, pec >> 16, pec >>> 24]);
-  let name = [...(label || '')].filter((c) => c.charCodeAt(0) >= 0x20 && c.charCodeAt(0) < 0x7f).join('').slice(0, 16);
-  name = name.padEnd(16, ' ');
+  const name = machineLabel(label).padEnd(16, ' ');
   out.ascii('LA:' + name + '\r');
   out.bytes(new Array(12).fill(0x20));
   out.bytes([0xff, 0x00, 0x06, 0x26]);
@@ -166,6 +165,15 @@ export function writePES(input, label) {
   out.bytes(colors);
   out.bytes(new Array(127 - colors.length).fill(0x20));
   return out.result();
+}
+
+/**
+ * The design name as the machine shows it: the PEC label holds 16 plain ASCII characters, so accents are
+ * dropped from letters (ü → u) and anything else outside printable ASCII is removed.
+ */
+export function machineLabel(name) {
+  return (name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\x20-\x7e]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16);
 }
 
 function pesBlocks(pattern, colors, b) {

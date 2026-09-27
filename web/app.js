@@ -1,7 +1,7 @@
 import { contentBox } from './engine/analysis.js';
 import { defaultSettings } from './engine/digitizer.js';
 import { palettes, paletteList, nearestThread, findThread, brotherThread, isBrother, threadLabel, threadHex } from './engine/threads.js';
-import { readPES, writePES } from './engine/pes.js';
+import { readPES, writePES, machineLabel } from './engine/pes.js';
 import { STITCH, COLOR, bounds, stats, threadListText, threadUsage } from './engine/pattern.js';
 import { makeZip } from './engine/zip.js';
 
@@ -13,7 +13,7 @@ const STORE_KEY = 'replicator.settings.v1';
 
 const state = {
   source: null,          // canvas holding the (cropped) source image
-  sourceName: 'stocking',
+  sourceName: 'Christmas stocking', // the design name: file name, printed list, and the name the machine shows
   pesMode: false,
   hoop: [130, 180],
   widthMM: 100, heightMM: 100,
@@ -157,7 +157,7 @@ async function openFile(file) {
       state.sourceName = file.name.replace(/\.pes$/i, '');
       state.zoom = null;
       state.pan = { x: 0, y: 0 };
-      $('sourceName').textContent = file.name;
+      setDesignName(state.sourceName);
       setPattern(pattern);
       renderControls();
     } catch (err) {
@@ -203,7 +203,7 @@ function useImage(bitmap, name, title) {
   state.choices = [];
   state.zoom = null;
   state.pan = { x: 0, y: 0 };
-  $('sourceName').textContent = title;
+  setDesignName(name);
   fitToHoop();
   renderControls();
   renderAll();
@@ -229,6 +229,9 @@ const CHECKS = ['underlay', 'satinForThinAreas'];
 
 function bindControls() {
   $('file').addEventListener('change', (e) => { openFile(e.target.files[0]); e.target.value = ''; });
+  $('designName').addEventListener('input', (e) => { state.sourceName = e.target.value; renderMachineName(); });
+  $('designName').addEventListener('change', (e) => { setDesignName(e.target.value.replace(/\s+/g, ' ').trim()); });
+  $('designName').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
   const drop = $('drop');
   drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('drag'); });
   drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
@@ -889,12 +892,44 @@ if (window.claude?.use) {
   }).catch(() => {});
 }
 
-const safeName = () => (state.sourceName || 'design').replace(/[^\w\- ]+/g, '').trim().slice(0, 40) || 'design';
+/** The design name made safe for a file name (keeps accented letters; drops characters file systems reject). */
+const safeName = () => (state.sourceName || '').replace(/[\\/:*?"<>|\x00-\x1f]+/g, ' ').replace(/\s+/g, ' ')
+  .trim().replace(/^\.+/, '').slice(0, 60) || 'design';
+
+function setDesignName(name) {
+  state.sourceName = name;
+  $('designName').value = name;
+  renderMachineName();
+}
+
+/** Sizes the name box to its text, so the pencil icon sits just after the name. */
+let measureCtx = null;
+function fitNameWidth() {
+  const input = $('designName');
+  const cs = getComputedStyle(input);
+  measureCtx = measureCtx || document.createElement('canvas').getContext('2d');
+  measureCtx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const text = input.value || input.placeholder || '';
+  const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + parseFloat(cs.borderLeftWidth) * 2;
+  input.style.width = Math.ceil(measureCtx.measureText(text).width + pad + 4) + 'px';
+}
+
+function renderMachineName() {
+  fitNameWidth();
+  const label = machineLabel(state.sourceName);
+  const out = $('machineName');
+  out.replaceChildren();
+  if (!label) { out.textContent = 'Name the design; your machine shows up to 16 plain characters.'; return; }
+  const b = document.createElement('b');
+  b.textContent = label;
+  out.append('Machine shows: ', b);
+}
 
 async function exportPES() {
   const p = state.pattern;
   if (!p) return;
   const name = safeName();
+  if (!downloads && await saveWithDialog(p, name)) return;
   const pes = writePES(p, name);
   const list = threadListText(p, name);
   if (downloads) {
@@ -909,6 +944,36 @@ async function exportPES() {
     return;
   }
   saveBlob(name + '.pes', new Blob([pes], { type: 'application/octet-stream' }));
+}
+
+/**
+ * Chrome and Edge can show a real Save dialog. Returns true if it handled the save (or the viewer cancelled),
+ * false if the browser can't, so the caller falls back to a plain download.
+ */
+async function saveWithDialog(p, name) {
+  if (!window.showSaveFilePicker) return false;
+  let handle;
+  try {
+    handle = await window.showSaveFilePicker({
+      suggestedName: name + '.pes',
+      types: [{ description: 'Brother embroidery file', accept: { 'application/octet-stream': ['.pes'] } }],
+    });
+  } catch (err) {
+    if (err?.name === 'AbortError') return true; // cancelled
+    return false; // not allowed here (e.g. inside a frame): use a plain download
+  }
+  // A name typed in the dialog becomes the design's name, including what the machine shows.
+  const chosen = handle.name.replace(/\.pes$/i, '');
+  if (chosen && chosen !== name) setDesignName(chosen);
+  try {
+    const writable = await handle.createWritable();
+    await writable.write(writePES(p, chosen || name));
+    await writable.close();
+    toast(`Saved ${handle.name}.`);
+  } catch (err) {
+    toast(`${handle.name} couldn't be saved: ${err?.message || 'unknown error'}`);
+  }
+  return true;
 }
 
 /** Draws the design's stitches (no hoop) onto a white canvas at most `max` px on its longer side. */
@@ -1021,11 +1086,12 @@ function saveBlob(filename, blob) {
 
 loadPrefs();
 bindControls();
+document.fonts?.ready.then(fitNameWidth);
 renderControls();
 renderAll();
 // Open with the sample so the first view shows what the tool does.
 fetch(new URL('./sample-stocking.png', import.meta.url))
   .then((r) => r.blob())
   .then((b) => createImageBitmap(b))
-  .then((bm) => { if (!state.source && !state.pesMode) useImage(bm, 'stocking', 'Sample: Christmas stocking'); })
-  .catch(() => { $('sourceName').textContent = 'Open an image to begin'; });
+  .then((bm) => { if (!state.source && !state.pesMode) useImage(bm, 'Christmas stocking', 'Christmas stocking'); })
+  .catch(() => { setDesignName(''); });

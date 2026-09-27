@@ -163,7 +163,18 @@
 
   /* ---------- stage */
   .stage-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .source-name { font-family: var(--font-display); font-size: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .name-field { display: grid; gap: 2px; min-width: 0; flex: 1 1 220px; max-width: 420px; }
+  .design-name {
+    font: 600 20px/1.25 var(--font-display); color: var(--ink); background: transparent; min-width: 4ch; max-width: 100%;
+    border: 1px solid transparent; border-radius: 6px; padding: 2px 6px; margin-left: -7px;
+  }
+  .design-name:hover { border-color: var(--line); }
+  .design-name:focus { border-color: var(--accent); background: var(--panel); outline: none; }
+  .name-row { display: flex; align-items: center; gap: 4px; cursor: text; }
+  .name-row .pencil { width: 15px; height: 15px; flex: none; color: var(--muted); }
+  .name-row:hover .pencil, .design-name:focus + .pencil { color: var(--accent); }
+  .machine-name { font-size: 12px; color: var(--muted); padding-left: 0; }
+  .machine-name b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); }
   .stage-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .fabric { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 12.5px; }
   .fabric button { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0; }
@@ -334,7 +345,14 @@
 <main class="layout">
   <section class="stage" aria-label="Design preview">
     <div class="stage-top">
-      <div class="source-name" id="sourceName">Sample: Christmas stocking</div>
+      <div class="name-field">
+        <label class="name-row">
+          <input id="designName" class="design-name" type="text" value="Christmas stocking" maxlength="60"
+            spellcheck="false" autocomplete="off" aria-label="Design name" title="Names the download, the printed list and the design on the machine">
+          <svg class="pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+        </label>
+        <span class="machine-name" id="machineName"></span>
+      </div>
       <div class="stage-tools">
         <div class="seg" role="group" aria-label="Show">
           <button type="button" data-view="stitches" aria-pressed="true">Stitches</button>

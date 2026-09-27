@@ -21,7 +21,9 @@ no account and no build step.
    don't want sewn, such as the background.
 4. **Check the preview**, on the fabric colour you're using, zoomed from 25% to 400% of actual size. The sew-out
    slider replays the stitching in order.
-5. **Download the PES file**, print the thread list, and sew.
+5. **Name it and download the PES file.** The name is also what your machine shows (up to 16 plain characters; the
+   app shows you what it will be). Chrome and Edge open a Save dialog; other browsers save to your downloads.
+6. **Print the thread list** and sew.
 
 You can also open an existing `.pes` file to preview it.
 
