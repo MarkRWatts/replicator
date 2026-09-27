@@ -1,0 +1,9 @@
+.DS_Store
+
+# Local test material: purchased designs, third-party images and documents, generated output
+/*.pes
+/*.jpg
+/*.jpeg
+/*.png
+/*.pdf
+test-output/

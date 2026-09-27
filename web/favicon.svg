@@ -1,0 +1,23 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- App-style icon for Replicator: an embroidery hoop with fabric, a satin column and a thread spool colour -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2530"/>
+      <stop offset="1" stop-color="#141117"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="58" fill="url(#bg)"/>
+  <!-- hoop frame with its clamp screw -->
+  <rect x="36" y="52" width="184" height="160" rx="36" fill="#b9bec6"/>
+  <rect x="112" y="36" width="32" height="26" rx="7" fill="#8d949e"/>
+  <!-- fabric -->
+  <rect x="50" y="66" width="156" height="132" rx="24" fill="#f6f5f0"/>
+  <!-- tatami fill: short staggered stitches -->
+  <g stroke="#d9a23a" stroke-width="5" stroke-linecap="round">
+    <path d="M70 150l18-18M96 150l18-18M122 150l18-18"/>
+    <path d="M80 164l18-18M106 164l18-18M132 164l18-18"/>
+    <path d="M70 178l18-18M96 178l18-18M122 178l18-18"/>
+  </g>
+  <!-- satin column -->
+  <path d="M74 118l14-30 14 30 14-30 14 30 14-30 14 30 14-30 14 30" fill="none" stroke="#e46f9f" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
